@@ -31,6 +31,7 @@ for the [OpenRA project](https://github.com/OpenRA/OpenRA/pull/3342).
 
 ### See also
 Later InstallShield archives can be extracted with [Unshield](https://github.com/twogood/unshield).
+
 [OmniBlade](https://github.com/OmniBlade/) implemented a very similar program years ago, which I was not aware of: https://github.com/OmniBlade/isextract
 
 ## Authors
