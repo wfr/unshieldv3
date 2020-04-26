@@ -26,15 +26,25 @@ namespace fs = std::filesystem;
 
 class  __attribute__ ((packed)) Header {
 public:
-    uint32_t signature;
-    /* */ uint8_t ignore0[8];
+    uint32_t signature1;
+    uint32_t signature2;
+    uint16_t u1;
+    uint16_t is_multivolume;
     uint16_t file_count;
-    /* */ uint8_t ignore1[4];
-    uint32_t archive_size;
-    /* */ uint8_t ignore2[19];
+    uint32_t datetime;
+    uint32_t compressed_size;
+    uint32_t uncompressed_size;
+    uint32_t u2;
+    uint8_t volume_total;
+    uint8_t volume_number;
+    uint8_t u3;
+    uint32_t split_begin_address;
+    uint32_t split_end_address;
     uint32_t toc_address;
-    /* */ uint8_t ignore3[4];
+    uint32_t u4;
     uint16_t dir_count;
+    uint32_t u5;
+    uint32_t u6;
 };
 static const uint32_t data_start = 255;
 
@@ -72,7 +82,7 @@ InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path
 
     Header hdr;
     fin.read(reinterpret_cast<char*>(&hdr), sizeof(Header));
-    assert(hdr.signature == 0x8C655D13);
+    assert(hdr.signature1 == 0x8C655D13 && hdr.signature2 == 0x02013a);
 //    std::cout << "File count: " << hdr.file_count << std::endl;
 //    std::cout << "Archive size: " << hdr.archive_size << std::endl;
 //    std::cout << "Directory count: " << hdr.dir_count << std::endl;
@@ -89,14 +99,20 @@ InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path
 //        std::cout << "Directory: " << name << std::endl;
     }
 
-    uint32_t accum_offset = 0;
     for (Directory& directory : directories) {
         for (int i = 0; i < directory.file_count; i++) {
-            fin.ignore(7);
+            uint8_t volume_end = read<uint8_t>();
+            uint16_t u1 = read<uint16_t>();
+            uint32_t uncompressed_size = read<uint32_t>();
             uint32_t compressed_size = read<uint32_t>();
-            fin.ignore(12);
+            uint32_t offset = read<uint32_t>();
+            uint32_t datetime = read<uint32_t>();
+            uint32_t u2 = read<uint32_t>();
             uint16_t chunk_size = read<uint16_t>();
-            fin.ignore(4);
+            uint8_t file_attrib = read<uint8_t>();
+            uint8_t is_split = read<uint8_t>();
+            uint8_t u3 = read<uint8_t>();
+            uint8_t volume_start = read<uint8_t>();
             std::string filename = readString8();
             fin.ignore(chunk_size - uint16_t(filename.length()) - 30);
 
@@ -106,9 +122,7 @@ InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path
             } else {
                 fullpath = filename;
             }
-            m_files[fullpath] = { filename, fullpath, compressed_size, accum_offset };
-
-            accum_offset += compressed_size;
+            m_files[fullpath] = { filename, fullpath, compressed_size, offset };
         }
     }
 }
@@ -136,7 +150,7 @@ std::vector<unsigned char> InstallShieldArchiveV3::extract(const std::string& fu
         return {};
     }
     const File& file = m_files[full_path];
-    fin.seekg(data_start + file._offset, std::ios::beg);
+    fin.seekg(file.offset, std::ios::beg);
     std::vector<unsigned char> buf(file.compressed_size);
     std::vector<unsigned char> out;
     fin.read(reinterpret_cast<char*>(&buf[0]), file.compressed_size);

@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 LIBS += -lstdc++fs
 CXXFLAGS += -Wall
+QMAKE_CXXFLAGS += -Wno-unused-variable
 
 SOURCES += \
     main.cpp \
