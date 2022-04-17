@@ -11,6 +11,7 @@ Contained files are compressed with the "PKware implode" algorithm.
 ## Usage
 ```
 ./unshieldv3 list ARCHIVE.Z
+
 ./unshieldv3 extract ARCHIVE.Z DESTINATION/
 ```
 
@@ -22,7 +23,7 @@ cmake ..
 make
 ```
 
-## History / Credits
+## References
 [ICOMP95.EXE](https://www.sac.sk/files.php?d=7&l=I) is the original proprietary (de)compressor.
 
 Veit Kannegieser reverse-engineered the file format
@@ -41,5 +42,10 @@ which I was not aware of: <https://github.com/OmniBlade/isextract>
 ### See also
 Later InstallShield archives can be extracted with [Unshield](https://github.com/twogood/unshield).
 
-## Authors
-Wolfgang Frisch
+## Copyright
+(C) Wolfgang Frisch, licensed under the Apache 2.0 license.
+
+### Contributors
+* @OmniBlade
+* @ligfx
+* @adrium
