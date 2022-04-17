@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "config.h"
 #include "installshieldarchivev3.h"
 #include <iostream>
 #include <iomanip>
@@ -26,7 +27,8 @@ namespace fs = std::filesystem;
 
 
 void usage() {
-    cerr << "Usage: " << endl;
+    cerr << "unshieldv3 version " << CMAKE_PROJECT_VER << endl;
+    cerr << "usage: " << endl;
     cerr << "  unshieldv3 list ARCHIVE.Z" << endl;
     cerr << "  unshieldv3 extract ARCHIVE.Z DESTINATION" << endl;
 }
