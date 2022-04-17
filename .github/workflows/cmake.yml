@@ -44,5 +44,5 @@ jobs:
       with:
         name: unshieldv3.x86_64
         path: ${{github.workspace}}/build/unshieldv3
-        retention: 1
+        retention-days: 1
 
