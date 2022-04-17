@@ -20,6 +20,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - uses: actions/upload-artifact@v3
+      with:
+        name: unshieldv3.x86_64
+        path: ${{github.workspace}}/build/unshieldv3
+
+    - name: Print env
+      run: |
+        echo github.event.action: ${{ github.event.action }}
+        echo github.event_name: ${{ github.event_name }}
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
