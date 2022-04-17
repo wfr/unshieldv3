@@ -12,3 +12,4 @@ add_executable (unshieldv3
 	blast/blast.c
 )
 target_link_libraries(unshieldv3 stdc++fs)
+install(TARGETS unshieldv3)
