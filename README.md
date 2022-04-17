@@ -6,7 +6,7 @@ InstallShield Z format is a compressed archive format used by version 3 of the I
 
 Z files can be recognized by their magic marker: `13 5D 65 8C 3A 01 02 00`.
 
-Contained files are compressed with the proprietary PKware "implode" algorithm by PKware.
+Contained files are compressed with the "PKware implode" algorithm.
 
 ## Usage
 ```
