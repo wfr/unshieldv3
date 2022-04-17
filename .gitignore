@@ -105,3 +105,6 @@ Thumbs.db
 *.dll
 *.exe
 
+# Build directory
+# ---------------
+build/*
