@@ -35,7 +35,7 @@ public:
         std::string name;
         std::string fullpath;
         uint32_t compressed_size;
-        uint32_t _offset;
+        uint32_t offset;
     };
 
     const std::map<std::string, File>& files() const {
