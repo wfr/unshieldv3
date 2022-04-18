@@ -75,6 +75,9 @@ InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path
         uint16_t chunk_size = read<uint16_t>();
         std::string name = readString16();
         fin.ignore(chunk_size - uint16_t(name.length()) - 6);
+        if (!isValidName(name)) {
+            throw std::runtime_error(std::string("Invalid directory name: ") + name);
+        }
         directories.push_back({name, file_count});
 //        std::cout << "Directory: " << name << std::endl;
     }
@@ -95,6 +98,10 @@ InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path
             uint8_t volume_start = read<uint8_t>();
             std::string filename = readString8();
             fin.ignore(chunk_size - uint16_t(filename.length()) - 30);
+
+            if (!isValidName(filename)) {
+                throw std::runtime_error(std::string("Invalid file name: ") + filename);
+            }
 
             std::string full_path;
             if (directory.name.length()) {
@@ -168,3 +175,12 @@ std::string InstallShieldArchiveV3::readString16() {
     return std::string(buf.begin(), buf.end());
 }
 
+bool InstallShieldArchiveV3::isValidName(const std::string& name) {
+    if (name.find("..\\") != std::string::npos) {
+        return false;
+    }
+    if (name.find("../") != std::string::npos) {
+        return false;
+    }
+    return true;
+}

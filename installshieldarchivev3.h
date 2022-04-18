@@ -55,5 +55,6 @@ protected:
     template<class T> T read();
     std::string readString8();
     std::string readString16();
+    bool isValidName(const std::string& name);
 };
 
