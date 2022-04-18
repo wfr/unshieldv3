@@ -24,6 +24,7 @@ extern "C" {
 
 namespace fs = std::filesystem;
 
+
 class  __attribute__ ((packed)) Header {
 public:
     uint32_t signature1;
@@ -46,28 +47,7 @@ public:
     uint32_t u5;
     uint32_t u6;
 };
-static const uint32_t data_start = 255;
 
-
-template<class T> T InstallShieldArchiveV3::read() {
-    T re;
-    fin.read(reinterpret_cast<char*>(&re), sizeof(re));
-    return re;
-}
-
-std::string InstallShieldArchiveV3::readString8() {
-    uint8_t len = read<uint8_t>();
-    std::vector<char> buf(len);
-    fin.read(&buf[0], len);
-    return std::string(buf.begin(), buf.end());
-}
-
-std::string InstallShieldArchiveV3::readString16() {
-    uint16_t len = read<uint16_t>();
-    std::vector<char> buf(len);
-    fin.read(&buf[0], len);
-    return std::string(buf.begin(), buf.end());
-}
 
 InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path)
     : path(path)
@@ -116,13 +96,13 @@ InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path
             std::string filename = readString8();
             fin.ignore(chunk_size - uint16_t(filename.length()) - 30);
 
-            std::string fullpath;
+            std::string full_path;
             if (directory.name.length()) {
-                fullpath = directory.name + "\\" + filename;
+                full_path = directory.name + "\\" + filename;
             } else {
-                fullpath = filename;
+                full_path = filename;
             }
-            m_files[fullpath] = { filename, fullpath, compressed_size, offset };
+            m_files[full_path] = { filename, full_path, compressed_size, offset };
         }
     }
 }
@@ -131,7 +111,6 @@ InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path
 bool InstallShieldArchiveV3::exists(const std::string& full_path) const {
     return m_files.count(full_path) > 0;
 }
-
 
 unsigned _blast_in(void *how, unsigned char **buf) {
     std::vector<unsigned char> *inbuf = reinterpret_cast<std::vector<unsigned char>*>(how);
@@ -145,7 +124,7 @@ int _blast_out(void *how, unsigned char *buf, unsigned len) {
     return false; // would indicate write error
 }
 
-std::vector<unsigned char> InstallShieldArchiveV3::extract(const std::string& full_path) {
+std::vector<uint8_t> InstallShieldArchiveV3::extract(const std::string& full_path) {
     if (!exists(full_path)) {
         return {};
     }
@@ -168,3 +147,24 @@ std::vector<unsigned char> InstallShieldArchiveV3::extract(const std::string& fu
 
     return out;
 }
+
+template<class T> T InstallShieldArchiveV3::read() {
+    T re;
+    fin.read(reinterpret_cast<char*>(&re), sizeof(re));
+    return re;
+}
+
+std::string InstallShieldArchiveV3::readString8() {
+    uint8_t len = read<uint8_t>();
+    std::vector<char> buf(len);
+    fin.read(&buf[0], len);
+    return std::string(buf.begin(), buf.end());
+}
+
+std::string InstallShieldArchiveV3::readString16() {
+    uint16_t len = read<uint16_t>();
+    std::vector<char> buf(len);
+    fin.read(&buf[0], len);
+    return std::string(buf.begin(), buf.end());
+}
+

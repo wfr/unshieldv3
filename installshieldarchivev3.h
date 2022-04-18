@@ -20,23 +20,17 @@ limitations under the License.
 #include <vector>
 #include <map>
 
-/* InstallShield V3 .Z archive reader.
- *
- * Reference (de)compressor: https://www.sac.sk/download/pack/icomp95.zip
- *
- * Assumes little-endian byte order. Don't bother,
- * until someone verifies that blast.c works on big-endian. */
 class InstallShieldArchiveV3 {
 public:
-    InstallShieldArchiveV3(const std::filesystem::path& path);
-
     class File {
     public:
         std::string name;
-        std::string fullpath;
+        std::string full_path;
         uint32_t compressed_size;
         uint32_t offset;
     };
+
+    InstallShieldArchiveV3(const std::filesystem::path& path);
 
     const std::map<std::string, File>& files() const {
         return m_files;
@@ -44,24 +38,22 @@ public:
 
     bool exists(const std::string& full_path) const;
 
-    std::vector<unsigned char> extract(const std::string& full_path);
+    std::vector<uint8_t> extract(const std::string& full_path);
 
 protected:
-    const std::filesystem::path& path;
-    std::ifstream fin;
-
-    template<class T> T read();
-    std::string readString8();
-    std::string readString16();
-
     class Directory {
     public:
         std::string name;
         uint16_t file_count;
     };
-    std::vector<Directory> directories;
 
-    // <full_path, File>
-    std::map<std::string, File> m_files;
+    const std::filesystem::path& path;
+    std::ifstream fin;
+    std::vector<Directory> directories;
+    std::map<std::string, File> m_files; // <full_path, File>
+
+    template<class T> T read();
+    std::string readString8();
+    std::string readString16();
 };
 

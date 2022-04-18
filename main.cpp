@@ -34,77 +34,95 @@ void usage() {
 }
 
 
-int main(int argc, char** argv)
-{
+void list(const InstallShieldArchiveV3& archive) {
+    for (auto el : archive.files()) {
+        std::string full_path = el.first;
+        cout << full_path << endl;
+    }
+}
+
+bool extract(InstallShieldArchiveV3& archive, const fs::path& destination) {
+    if (destination.empty()) {
+        cerr << "Please specify a destination directory." << endl;
+        return false;
+    }
+    if (!fs::exists(destination)) {
+        cerr << "Destination directory not found: " << destination << endl;
+        return false;
+    }
+    for (auto el : archive.files()) {
+        const std::string& full_path = el.first;
+        const InstallShieldArchiveV3::File& file = el.second;
+        cout << full_path << endl;
+        cout << "      Compressed size: " << setw(10) << file.compressed_size << endl;
+        auto contents = archive.extract(full_path);
+        cout << "    Uncompressed size: " << setw(10) << contents.size() << endl;
+
+        string fp = full_path;
+        replace(fp.begin(), fp.end(), '\\', fs::path::preferred_separator);
+        fs::path dest = destination / fp;
+        fs::path dest_dir = dest.parent_path();
+        if (!fs::create_directories(dest_dir)) {
+            if (!fs::exists(dest_dir)) {
+                cerr << "Could not create directory: " << dest_dir << endl;
+                return false;
+            }
+        }
+        ofstream fout(dest, ios::binary | ios::out);
+        if (fout.fail()) {
+            cerr << dest << endl;
+            cerr << "Could not create file: " << dest << endl;
+            return false;
+        }
+        fout.write(reinterpret_cast<char*>(contents.data()), long(contents.size()));
+        if (fout.fail()) {
+            cerr << "Could not write to: " << dest << endl;
+            return false;
+        }
+        fout.close();
+    }
+    return true;
+}
+
+
+int main(int argc, char** argv) {
     std::string action;
     fs::path archive_path;
-    fs::path destination_dir;
+    fs::path destination;
 
     vector<string> args;
     for (int i = 0; i < argc; i++) {
         args.push_back(argv[i]);
     }
+
     if (args.size() < 3 || args[1] == "-h" || args[1] == "--help") {
         usage();
         return 1;
     }
+
     if (args.size() >= 3) {
         action = args[1];
         archive_path = args[2];
     }
     if (args.size() >= 4) {
-        destination_dir = args[3];
+        destination = args[3];
     }
 
     if (!fs::exists(archive_path)) {
         cerr << "Archive not found: " << archive_path << endl;
         return 1;
     }
+
     InstallShieldArchiveV3 archive(archive_path);
 
     if (action == "list") {
-        for (auto el : archive.files()) {
-            cout << el.first << endl;
-        }
-    } else if (action == "extract") {
-        if (destination_dir.empty()) {
-            cerr << "Please specify a destination directory." << endl;
+        list(archive);
+    } else
+    if (action == "extract") {
+        bool success = extract(archive, destination);
+        if (!success) {
+            cerr << "ERROR: extraction failed" << endl;
             return 1;
-        }
-        if (!fs::exists(destination_dir)) {
-            cerr << "Destination directory not found: " << destination_dir << endl;
-            return 1;
-        }
-        for (auto el : archive.files()) {
-            const std::string& full_path = el.first;
-            const InstallShieldArchiveV3::File& file = el.second;
-            cout << full_path << endl;
-            cout << "      Compressed size: " << setw(10) << file.compressed_size << endl;
-            auto contents = archive.extract(full_path);
-            cout << "    Uncompressed size: " << setw(10) << contents.size() << endl;
-
-            string fp = full_path;
-            replace(fp.begin(), fp.end(), '\\', fs::path::preferred_separator);
-            fs::path dest = destination_dir / fp;
-            fs::path dest_dir = dest.parent_path();
-            if (!fs::create_directories(dest_dir)) {
-                if (!fs::exists(dest_dir)) {
-                    cerr << "Could not create directory: " << dest_dir << endl;
-                    return 1;
-                }
-            }
-            ofstream fout(dest, ios::binary | ios::out);
-            if (fout.fail()) {
-                cerr << dest << endl;
-                cerr << "Could not create file: " << dest << endl;
-                return 1;
-            }
-            fout.write(reinterpret_cast<char*>(contents.data()), long(contents.size()));
-            if (fout.fail()) {
-                cerr << "Could not write to: " << dest << endl;
-                return 1;
-            }
-            fout.close();
         }
     } else {
         usage();
