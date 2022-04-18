@@ -55,7 +55,7 @@ bool extract(InstallShieldArchiveV3& archive, const fs::path& destination) {
         const InstallShieldArchiveV3::File& file = el.second;
         cout << full_path << endl;
         cout << "      Compressed size: " << setw(10) << file.compressed_size << endl;
-        auto contents = archive.extract(full_path);
+        auto contents = archive.decompress(full_path);
         cout << "    Uncompressed size: " << setw(10) << contents.size() << endl;
 
         string fp = full_path;

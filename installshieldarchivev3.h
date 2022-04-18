@@ -38,7 +38,7 @@ public:
 
     bool exists(const std::string& full_path) const;
 
-    std::vector<uint8_t> extract(const std::string& full_path);
+    std::vector<uint8_t> decompress(const std::string& full_path);
 
 protected:
     class Directory {

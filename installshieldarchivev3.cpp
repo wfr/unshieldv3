@@ -124,7 +124,7 @@ int _blast_out(void *how, unsigned char *buf, unsigned len) {
     return false; // would indicate write error
 }
 
-std::vector<uint8_t> InstallShieldArchiveV3::extract(const std::string& full_path) {
+std::vector<uint8_t> InstallShieldArchiveV3::decompress(const std::string& full_path) {
     if (!exists(full_path)) {
         return {};
     }
