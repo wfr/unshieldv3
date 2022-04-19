@@ -63,7 +63,10 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
 
     fin.open(apath, std::ios::in | std::ios::binary);
     if (!fin.is_open()) {
-        std::cerr << "Cannot open: " << path << std::endl;
+        throw std::runtime_error(
+            (std::ostringstream()
+                << "Cannot open archive: " << apath
+        ).str());
         return;
     }
     uint64_t file_size = fs::file_size(apath);
@@ -172,7 +175,11 @@ std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
     unsigned left = 0;
     ret = blast(_blast_in, static_cast<void*>(&buf), _blast_out, static_cast<void*>(&out), &left, nullptr);
     if (ret != 0) {
-        std::cerr << "Blast error: " << ret << std::endl;
+        throw std::runtime_error(
+            (std::ostringstream()
+                << "Blast decompression error: " << ret
+            ).str()
+        );
         return {};
     }
 
