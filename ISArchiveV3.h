@@ -27,7 +27,12 @@ public:
         std::string name;
         std::string full_path;
         uint32_t compressed_size;
+        uint32_t uncompressed_size;
+        uint32_t datetime;
+        uint8_t attrib;
         uint32_t offset;
+        uint8_t is_split;
+        uint8_t volume_start, volume_end;
     };
 
     ISArchiveV3(const std::filesystem::path& path);

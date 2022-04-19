@@ -84,32 +84,33 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& path)
 
     for (Directory& directory : directories) {
         for (int i = 0; i < directory.file_count; i++) {
-            uint8_t volume_end = read<uint8_t>();
+            File f;
+
+            f.volume_end = read<uint8_t>();
             uint16_t u1 = read<uint16_t>();
-            uint32_t uncompressed_size = read<uint32_t>();
-            uint32_t compressed_size = read<uint32_t>();
-            uint32_t offset = read<uint32_t>();
-            uint32_t datetime = read<uint32_t>();
+            f.uncompressed_size = read<uint32_t>();
+            f.compressed_size = read<uint32_t>();
+            f.offset = read<uint32_t>();
+            f.datetime = read<uint32_t>();
             uint32_t u2 = read<uint32_t>();
             uint16_t chunk_size = read<uint16_t>();
-            uint8_t file_attrib = read<uint8_t>();
-            uint8_t is_split = read<uint8_t>();
+            f.attrib = read<uint8_t>();
+            f.is_split = read<uint8_t>();
             uint8_t u3 = read<uint8_t>();
-            uint8_t volume_start = read<uint8_t>();
-            std::string filename = readString8();
-            fin.ignore(chunk_size - uint16_t(filename.length()) - 30);
+            f.volume_start = read<uint8_t>();
+            f.name = readString8();
+            fin.ignore(chunk_size - uint16_t(f.name.length()) - 30);
 
-            if (!isValidName(filename)) {
-                throw std::runtime_error(std::string("Invalid file name: ") + filename);
-            }
-
-            std::string full_path;
             if (directory.name.length()) {
-                full_path = directory.name + "\\" + filename;
+                f.full_path = directory.name + "\\" + f.name;
             } else {
-                full_path = filename;
+                f.full_path = f.name;
             }
-            m_files[full_path] = { filename, full_path, compressed_size, offset };
+            if (!isValidName(f.full_path)) {
+                throw std::runtime_error(std::string("Invalid file path: ") + f.full_path);
+            }
+
+            m_files[f.full_path] = f;
         }
     }
 }
