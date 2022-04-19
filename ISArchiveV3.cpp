@@ -159,8 +159,11 @@ int _blast_out(void *how, unsigned char *buf, unsigned len) {
 
 std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
     if (!exists(full_path)) {
-        // TODO: error handling
-        return {};
+        throw std::runtime_error(
+            (std::ostringstream()
+                << "decompress() called with invalid path: " << full_path
+            ).str()
+        );
     }
     const File* file = fileByPath(full_path);
     fin.seekg(file->offset, std::ios::beg);
