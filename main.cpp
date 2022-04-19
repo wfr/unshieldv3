@@ -37,9 +37,8 @@ void info(const ISArchiveV3& archive) {
 }
 
 void list(const ISArchiveV3& archive) {
-    for (auto el : archive.files()) {
-        std::string full_path = el.first;
-        cout << full_path << endl;
+    for (auto file : archive.files()) {
+        cout << file.full_path << endl;
     }
 }
 
@@ -52,15 +51,13 @@ bool extract(ISArchiveV3& archive, const fs::path& destination) {
         cerr << "Destination directory not found: " << destination << endl;
         return false;
     }
-    for (auto el : archive.files()) {
-        const std::string& full_path = el.first;
-        const ISArchiveV3::File& file = el.second;
-        cout << full_path << endl;
+    for (auto file : archive.files()) {
+        cout << file.full_path << endl;
         cout << "      Compressed size: " << setw(10) << file.compressed_size << endl;
-        auto contents = archive.decompress(full_path);
+        auto contents = archive.decompress(file.full_path);
         cout << "    Uncompressed size: " << setw(10) << contents.size() << endl;
 
-        string fp = full_path;
+        string fp = file.full_path;
         replace(fp.begin(), fp.end(), '\\', fs::path::preferred_separator);
         fs::path dest = destination / fp;
         fs::path dest_dir = dest.parent_path();

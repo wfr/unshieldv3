@@ -20,10 +20,9 @@ limitations under the License.
 #include <vector>
 #include <map>
 
-
 class ISArchiveV3 {
 public:
-    ISArchiveV3(const std::filesystem::path& archive_path);
+    ISArchiveV3(const std::filesystem::path& apath);
 
     class File {
     public:
@@ -38,9 +37,7 @@ public:
         uint8_t volume_start, volume_end;
     };
 
-    const std::map<std::string, File>& files() const {
-        return m_files;
-    }
+    const std::vector<File>& files() const;
     bool exists(const std::string& full_path) const;
     std::vector<uint8_t> decompress(const std::string& full_path);
 
@@ -48,10 +45,11 @@ protected:
     template<class T> T read();
     std::string readString8();
     std::string readString16();
-    bool isValidName(const std::string& name);
+    bool isValidName(const std::string& name) const;
+    const File* fileByPath(const std::string& full_path) const;
 
     const std::filesystem::path& path;
     std::ifstream fin;
-    std::map<std::string, File> m_files; // <full_path, File>
+    std::vector<File> m_files;
 };
 

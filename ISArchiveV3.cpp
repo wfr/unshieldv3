@@ -56,17 +56,17 @@ public:
 };
 
 
-ISArchiveV3::ISArchiveV3(const std::filesystem::path& archive_path)
+ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
     : path(path)
 {
     std::vector<Directory> directories;
 
-    fin.open(archive_path, std::ios::in | std::ios::binary);
+    fin.open(apath, std::ios::in | std::ios::binary);
     if (!fin.is_open()) {
         std::cerr << "Cannot open: " << path << std::endl;
         return;
     }
-    uint64_t file_size = fs::file_size(archive_path);
+    uint64_t file_size = fs::file_size(apath);
     assert(file_size > sizeof(Header));
 
     Header hdr;
@@ -119,14 +119,27 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& archive_path)
                 throw std::runtime_error(std::string("Invalid file path: ") + f.full_path);
             }
 
-            m_files[f.full_path] = f;
+            m_files.push_back(f);
         }
     }
 }
 
+const std::vector<ISArchiveV3::File>& ISArchiveV3::files() const {
+    return m_files;
+}
+
+const ISArchiveV3::File* ISArchiveV3::fileByPath(const std::string& full_path) const {
+    // std::map would be more efficient but let's keep it simple for now.
+    for (const auto& file : m_files) {
+        if (file.full_path == full_path) {
+            return &file;
+        }
+    }
+    return nullptr;
+}
 
 bool ISArchiveV3::exists(const std::string& full_path) const {
-    return m_files.count(full_path) > 0;
+    return fileByPath(full_path) != nullptr;
 }
 
 unsigned _blast_in(void *how, unsigned char **buf) {
@@ -146,11 +159,11 @@ std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
         // TODO: error handling
         return {};
     }
-    const File& file = m_files[full_path];
-    fin.seekg(file.offset, std::ios::beg);
-    std::vector<unsigned char> buf(file.compressed_size);
+    const File* file = fileByPath(full_path);
+    fin.seekg(file->offset, std::ios::beg);
+    std::vector<unsigned char> buf(file->compressed_size);
     std::vector<unsigned char> out;
-    fin.read(reinterpret_cast<char*>(&buf[0]), file.compressed_size);
+    fin.read(reinterpret_cast<char*>(&buf[0]), file->compressed_size);
     if (fin.fail()) {
         throw std::runtime_error("Read failed");
     }
@@ -186,7 +199,7 @@ std::string ISArchiveV3::readString16() {
     return std::string(buf.begin(), buf.end());
 }
 
-bool ISArchiveV3::isValidName(const std::string& name) {
+bool ISArchiveV3::isValidName(const std::string& name) const {
     if (name.find("..\\") != std::string::npos) {
         return false;
     }
