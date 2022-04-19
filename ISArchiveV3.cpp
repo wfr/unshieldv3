@@ -19,7 +19,7 @@ limitations under the License.
 #include <iostream>
 #include <exception>
 extern "C" {
-    #include "blast/blast.h"
+    #include "blast.h"
 };
 
 namespace fs = std::filesystem;

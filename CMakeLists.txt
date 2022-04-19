@@ -19,7 +19,7 @@ configure_file(
 add_executable (unshieldv3
 	main.cpp
 	ISArchiveV3.cpp
-	blast/blast.c
+	blast.c
 )
 target_link_libraries(unshieldv3 stdc++fs)
 install(TARGETS unshieldv3)
