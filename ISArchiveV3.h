@@ -20,12 +20,15 @@ limitations under the License.
 #include <vector>
 #include <map>
 
+
 class ISArchiveV3 {
 public:
+    ISArchiveV3(const std::filesystem::path& archive_path);
+
     class File {
     public:
         std::string name;
-        std::string full_path;
+        std::string full_path; // Directory separator: \ (Windows)
         uint32_t compressed_size;
         uint32_t uncompressed_size;
         uint32_t datetime;
@@ -35,31 +38,20 @@ public:
         uint8_t volume_start, volume_end;
     };
 
-    ISArchiveV3(const std::filesystem::path& path);
-
     const std::map<std::string, File>& files() const {
         return m_files;
     }
-
     bool exists(const std::string& full_path) const;
-
     std::vector<uint8_t> decompress(const std::string& full_path);
 
 protected:
-    class Directory {
-    public:
-        std::string name;
-        uint16_t file_count;
-    };
-
-    const std::filesystem::path& path;
-    std::ifstream fin;
-    std::vector<Directory> directories;
-    std::map<std::string, File> m_files; // <full_path, File>
-
     template<class T> T read();
     std::string readString8();
     std::string readString16();
     bool isValidName(const std::string& name);
+
+    const std::filesystem::path& path;
+    std::ifstream fin;
+    std::map<std::string, File> m_files; // <full_path, File>
 };
 

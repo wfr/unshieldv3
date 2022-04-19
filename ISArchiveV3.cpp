@@ -49,15 +49,24 @@ public:
 };
 
 
-ISArchiveV3::ISArchiveV3(const std::filesystem::path& path)
+class Directory {
+public:
+    std::string name;
+    uint16_t file_count;
+};
+
+
+ISArchiveV3::ISArchiveV3(const std::filesystem::path& archive_path)
     : path(path)
 {
-    fin.open(path, std::ios::in | std::ios::binary);
+    std::vector<Directory> directories;
+
+    fin.open(archive_path, std::ios::in | std::ios::binary);
     if (!fin.is_open()) {
         std::cerr << "Cannot open: " << path << std::endl;
         return;
     }
-    uint64_t file_size = fs::file_size(path);
+    uint64_t file_size = fs::file_size(archive_path);
     assert(file_size > sizeof(Header));
 
     Header hdr;
@@ -134,6 +143,7 @@ int _blast_out(void *how, unsigned char *buf, unsigned len) {
 
 std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
     if (!exists(full_path)) {
+        // TODO: error handling
         return {};
     }
     const File& file = m_files[full_path];
