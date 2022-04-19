@@ -20,7 +20,7 @@ limitations under the License.
 #include <vector>
 #include <map>
 
-class InstallShieldArchiveV3 {
+class ISArchiveV3 {
 public:
     class File {
     public:
@@ -30,7 +30,7 @@ public:
         uint32_t offset;
     };
 
-    InstallShieldArchiveV3(const std::filesystem::path& path);
+    ISArchiveV3(const std::filesystem::path& path);
 
     const std::map<std::string, File>& files() const {
         return m_files;

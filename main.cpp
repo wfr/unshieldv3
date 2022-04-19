@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include "config.h"
-#include "installshieldarchivev3.h"
+#include "ISArchiveV3.h"
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -33,15 +33,17 @@ void usage() {
     cerr << "  unshieldv3 extract ARCHIVE.Z DESTINATION" << endl;
 }
 
+void info(const ISArchiveV3& archive) {
+}
 
-void list(const InstallShieldArchiveV3& archive) {
+void list(const ISArchiveV3& archive) {
     for (auto el : archive.files()) {
         std::string full_path = el.first;
         cout << full_path << endl;
     }
 }
 
-bool extract(InstallShieldArchiveV3& archive, const fs::path& destination) {
+bool extract(ISArchiveV3& archive, const fs::path& destination) {
     if (destination.empty()) {
         cerr << "Please specify a destination directory." << endl;
         return false;
@@ -52,7 +54,7 @@ bool extract(InstallShieldArchiveV3& archive, const fs::path& destination) {
     }
     for (auto el : archive.files()) {
         const std::string& full_path = el.first;
-        const InstallShieldArchiveV3::File& file = el.second;
+        const ISArchiveV3::File& file = el.second;
         cout << full_path << endl;
         cout << "      Compressed size: " << setw(10) << file.compressed_size << endl;
         auto contents = archive.decompress(full_path);
@@ -113,7 +115,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    InstallShieldArchiveV3 archive(archive_path);
+    ISArchiveV3 archive(archive_path);
 
     if (action == "list") {
         list(archive);

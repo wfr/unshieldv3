@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "installshieldarchivev3.h"
+#include "ISArchiveV3.h"
 #include <cassert>
 #include <iostream>
 #include <exception>
@@ -49,7 +49,7 @@ public:
 };
 
 
-InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path)
+ISArchiveV3::ISArchiveV3(const std::filesystem::path& path)
     : path(path)
 {
     fin.open(path, std::ios::in | std::ios::binary);
@@ -115,7 +115,7 @@ InstallShieldArchiveV3::InstallShieldArchiveV3(const std::filesystem::path& path
 }
 
 
-bool InstallShieldArchiveV3::exists(const std::string& full_path) const {
+bool ISArchiveV3::exists(const std::string& full_path) const {
     return m_files.count(full_path) > 0;
 }
 
@@ -131,7 +131,7 @@ int _blast_out(void *how, unsigned char *buf, unsigned len) {
     return false; // would indicate write error
 }
 
-std::vector<uint8_t> InstallShieldArchiveV3::decompress(const std::string& full_path) {
+std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
     if (!exists(full_path)) {
         return {};
     }
@@ -155,27 +155,27 @@ std::vector<uint8_t> InstallShieldArchiveV3::decompress(const std::string& full_
     return out;
 }
 
-template<class T> T InstallShieldArchiveV3::read() {
+template<class T> T ISArchiveV3::read() {
     T re;
     fin.read(reinterpret_cast<char*>(&re), sizeof(re));
     return re;
 }
 
-std::string InstallShieldArchiveV3::readString8() {
+std::string ISArchiveV3::readString8() {
     uint8_t len = read<uint8_t>();
     std::vector<char> buf(len);
     fin.read(&buf[0], len);
     return std::string(buf.begin(), buf.end());
 }
 
-std::string InstallShieldArchiveV3::readString16() {
+std::string ISArchiveV3::readString16() {
     uint16_t len = read<uint16_t>();
     std::vector<char> buf(len);
     fin.read(&buf[0], len);
     return std::string(buf.begin(), buf.end());
 }
 
-bool InstallShieldArchiveV3::isValidName(const std::string& name) {
+bool ISArchiveV3::isValidName(const std::string& name) {
     if (name.find("..\\") != std::string::npos) {
         return false;
     }
