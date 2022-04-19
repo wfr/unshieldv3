@@ -166,6 +166,7 @@ std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
         );
     }
     const File* file = fileByPath(full_path);
+    assert(file != nullptr);
     fin.seekg(file->offset, std::ios::beg);
     std::vector<unsigned char> buf(file->compressed_size);
     std::vector<unsigned char> out;
