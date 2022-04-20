@@ -57,7 +57,7 @@ public:
 
 
 ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
-    : path(path)
+    : path(apath)
 {
     std::vector<Directory> directories;
 
@@ -98,15 +98,18 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
 
             f.volume_end = read<uint8_t>();
             uint16_t u1 = read<uint16_t>();
+            (void)u1;
             f.uncompressed_size = read<uint32_t>();
             f.compressed_size = read<uint32_t>();
             f.offset = read<uint32_t>();
             f.datetime = read<uint32_t>();
             uint32_t u2 = read<uint32_t>();
+            (void)u2;
             uint16_t chunk_size = read<uint16_t>();
             f.attrib = read<uint8_t>();
             f.is_split = read<uint8_t>();
             uint8_t u3 = read<uint8_t>();
+            (void)u3;
             f.volume_start = read<uint8_t>();
             f.name = readString8();
             fin.ignore(chunk_size - uint16_t(f.name.length()) - 30);
