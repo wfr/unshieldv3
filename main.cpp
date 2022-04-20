@@ -19,26 +19,42 @@ limitations under the License.
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <deque>
 #include <string>
 #include <algorithm>
+#include <chrono>
 
 using namespace std;
 namespace fs = std::filesystem;
 
 
-void usage() {
-    cerr << "unshieldv3 version " << CMAKE_PROJECT_VER << endl;
-    cerr << "usage: " << endl;
-    cerr << "  unshieldv3 list ARCHIVE.Z" << endl;
-    cerr << "  unshieldv3 extract ARCHIVE.Z DESTINATION" << endl;
-}
-
 void info(const ISArchiveV3& archive) {
 }
 
-void list(const ISArchiveV3& archive) {
-    for (auto file : archive.files()) {
-        cout << file.full_path << endl;
+void list(const ISArchiveV3& archive, bool verbose = false) {
+    size_t max_path = 0;
+    if (verbose) {
+        cout << string(78, '-') << endl;
+        for (auto f : archive.files()) {
+            max_path = max(f.full_path.size(), max_path);
+        }
+        cout << left << setw(max_path) << "Path" << "  "
+            << right << setw(8) << "Size" << "  "
+            << "Date  "
+            << endl;
+        cout << string(78, '-') << endl;
+    }
+
+    for (auto f : archive.files()) {
+        if (verbose) {
+            std::tm tm = f.tm();
+            cout << left << setw(max_path) << f.full_path << "  "
+                << right << setw(8) << f.uncompressed_size << "  "
+                << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << "  "
+                << endl;
+        } else {
+            cout << f.full_path << endl;
+        }
     }
 }
 
@@ -83,49 +99,82 @@ bool extract(ISArchiveV3& archive, const fs::path& destination) {
     return true;
 }
 
+int cmd_help(deque<string> subargs = {}) {
+    cerr << "unshieldv3 version " << CMAKE_PROJECT_VER << endl;
+    cerr << "usage: " << endl;
+    cerr << "  unshieldv3 help                        Produce this message" << endl;
+    cerr << "  unshieldv3 list [-v] ARCHIVE.Z         List ARCHIVE contents" << endl;
+    cerr << "  unshieldv3 extract ARCHIVE.Z DESTDIR   Extract ARCHIVE to DESTDIR" << endl;
+    return 1;
+}
+
+int cmd_list(deque<string> subargs) {
+    bool verbose = false;
+    string apath;
+
+    if (subargs.size() == 0) {
+        return cmd_help();
+    }
+    if (subargs[0] == "-v") {
+        verbose = true;
+        subargs.pop_front();
+    }
+    if (subargs.size() == 1) {
+        apath = subargs[0];
+    } else {
+        return cmd_help();
+    }
+    if (!fs::exists(apath)) {
+        cerr << "Archive not found: " << apath << endl;
+        return 1;
+    }
+    ISArchiveV3 archive(apath);
+    list(archive, verbose);
+    return true;
+}
+
+int cmd_extract(deque<string> subargs) {
+    fs::path apath;
+    fs::path destdir;
+
+    if (subargs.size() != 2) {
+        return cmd_help();
+    }
+
+    apath = subargs[0];
+    destdir = subargs[1];
+    if (!fs::exists(apath)) {
+        cerr << "Archive not found: " << apath << endl;
+        return 1;
+    }
+    ISArchiveV3 archive(apath);
+    return extract(archive, destdir) ? 0 : 1;
+}
 
 int main(int argc, char** argv) {
-    std::string action;
-    fs::path archive_path;
-    fs::path destination;
 
     vector<string> args;
     for (int i = 0; i < argc; i++) {
         args.push_back(argv[i]);
     }
-
-    if (args.size() < 3 || args[1] == "-h" || args[1] == "--help") {
-        usage();
-        return 1;
+    if (args.size() <= 1) {
+        return cmd_help();
     }
 
-    if (args.size() >= 3) {
-        action = args[1];
-        archive_path = args[2];
-    }
-    if (args.size() >= 4) {
-        destination = args[3];
+    deque<string> subargs = deque<string> {args.begin() + 2, args.end()};
+
+    if (args[1] == "help") {
+        return cmd_help(subargs);
     }
 
-    if (!fs::exists(archive_path)) {
-        cerr << "Archive not found: " << archive_path << endl;
-        return 1;
+    if (args[1] == "list") {
+        return cmd_list(subargs);
     }
 
-    ISArchiveV3 archive(archive_path);
-
-    if (action == "list") {
-        list(archive);
-    } else
-    if (action == "extract") {
-        bool success = extract(archive, destination);
-        if (!success) {
-            cerr << "ERROR: extraction failed" << endl;
-            return 1;
-        }
-    } else {
-        usage();
-        return 1;
+    if (args[1] == "extract") {
+        return cmd_extract(subargs);
     }
-    return 0;
+
+    cmd_help();
+    return 1;
 }
