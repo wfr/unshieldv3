@@ -63,11 +63,9 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
 
     fin.open(apath, std::ios::in | std::ios::binary);
     if (!fin.is_open()) {
-        throw std::runtime_error(
-            (std::ostringstream()
-                << "Cannot open archive: " << apath
-        ).str());
-        return;
+        std::ostringstream os;
+        os << "Cannot open archive: " << apath;
+        throw std::runtime_error(os.str());
     }
     uint64_t file_size = fs::file_size(apath);
     assert(file_size > sizeof(Header));
@@ -159,11 +157,9 @@ int _blast_out(void *how, unsigned char *buf, unsigned len) {
 
 std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
     if (!exists(full_path)) {
-        throw std::runtime_error(
-            (std::ostringstream()
-                << "decompress() called with invalid path: " << full_path
-            ).str()
-        );
+        std::ostringstream os;
+        os << "decompress() called with invalid path: " << full_path;
+        throw std::runtime_error(os.str());
     }
     const File* file = fileByPath(full_path);
     assert(file != nullptr);
@@ -179,11 +175,9 @@ std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
     unsigned left = 0;
     ret = blast(_blast_in, static_cast<void*>(&buf), _blast_out, static_cast<void*>(&out), &left, nullptr);
     if (ret != 0) {
-        throw std::runtime_error(
-            (std::ostringstream()
-                << "Blast decompression error: " << ret
-            ).str()
-        );
+        std::ostringstream os;
+        os << "Blast decompression error: " << ret;
+        throw std::runtime_error(os.str());
         return {};
     }
 
