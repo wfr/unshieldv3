@@ -36,8 +36,8 @@ public:
     uint32_t compressed_size;
     uint32_t uncompressed_size;
     uint32_t u2;
-    uint8_t volume_total;
-    uint8_t volume_number;
+    uint8_t volume_total;  // set in first vol only, zero in subsequent vols
+    uint8_t volume_number; // [1...n]
     uint8_t u3;
     uint32_t split_begin_address;
     uint32_t split_end_address;

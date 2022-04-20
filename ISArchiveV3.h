@@ -19,6 +19,7 @@ limitations under the License.
 #include <fstream>
 #include <vector>
 #include <map>
+#include <chrono>
 
 class ISArchiveV3 {
 public:
@@ -35,6 +36,20 @@ public:
         uint32_t offset;
         uint8_t is_split;
         uint8_t volume_start, volume_end;
+
+        std::tm tm() {
+            uint16_t file_date = datetime & 0xffff;
+            uint16_t file_time = (datetime >> 16) & 0xffff;
+            std::tm tm = { /* .tm_sec  = */ (file_time & 0x1f) * 2,
+                           /* .tm_min  = */ (file_time >> 5) & 0x3f,
+                           /* .tm_hour = */ (file_time >> 11) & 0x1f,
+                           /* .tm_mday = */ (file_date) & 0x1f,
+                           /* .tm_mon  = */ ((file_date >> 5) & 0xf) - 1,
+                           /* .tm_year = */ (((file_date >> 9) & 0x7f) + 1980) - 1900,
+                         };
+            tm.tm_isdst = -1;
+            return tm;
+        }
     };
 
     const std::vector<File>& files() const;
