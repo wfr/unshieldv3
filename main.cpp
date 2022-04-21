@@ -34,7 +34,6 @@ void info(const ISArchiveV3& archive) {
 void list(const ISArchiveV3& archive, bool verbose = false) {
     size_t max_path = 0;
     if (verbose) {
-        cout << string(78, '-') << endl;
         for (auto f : archive.files()) {
             max_path = max(f.full_path.size(), max_path);
         }
@@ -42,7 +41,10 @@ void list(const ISArchiveV3& archive, bool verbose = false) {
             << right << setw(8) << "Size" << "  "
             << "Date  "
             << endl;
-        cout << string(78, '-') << endl;
+        cout << left << setw(max_path) << "----" << "  "
+            << right << setw(8) << "----" << "  "
+            << "----"
+            << endl;
     }
 
     for (auto f : archive.files()) {
