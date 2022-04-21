@@ -38,6 +38,7 @@ public:
         uint8_t volume_start, volume_end;
 
         std::tm tm() {
+            // source: https://github.com/lephilousophe/idecomp
             uint16_t file_date = datetime & 0xffff;
             uint16_t file_time = (datetime >> 16) & 0xffff;
             std::tm tm = { /* .tm_sec  = */ (file_time & 0x1f) * 2,
