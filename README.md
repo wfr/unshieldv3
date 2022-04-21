@@ -18,6 +18,18 @@ usage:
   unshieldv3 extract ARCHIVE.Z DESTDIR   Extract ARCHIVE to DESTDIR
 ```
 
+e.g.
+```
+$ ./unshieldv3 list -v NETSCAPE.1
+Path                             Size  Date
+----                             ----  ----
+NHANDBK.ICO                       766  1995-06-12 12:17:56
+HANDBK.ICO                        766  1995-06-12 12:17:48
+NSCAPE16.TLB                     3728  1995-07-17 17:02:20
+NAPLAYER.EXE                   149360  1995-06-30 15:51:12
+NETSCAPE.EXE                  1353344  1996-03-08 21:24:34
+```
+
 ## Building
 Requirements: GCC, cmake
 ```
