@@ -25,6 +25,29 @@ class ISArchiveV3 {
 public:
     ISArchiveV3(const std::filesystem::path& apath);
 
+    class  __attribute__ ((packed)) Header {
+    public:
+        uint32_t signature1;
+        uint32_t signature2;
+        uint16_t u1;
+        uint16_t is_multivolume;
+        uint16_t file_count;
+        uint32_t datetime;
+        uint32_t compressed_size;
+        uint32_t uncompressed_size;
+        uint32_t u2;
+        uint8_t volume_total;  // set in first vol only, zero in subsequent vols
+        uint8_t volume_number; // [1...n]
+        uint8_t u3;
+        uint32_t split_begin_address;
+        uint32_t split_end_address;
+        uint32_t toc_address;
+        uint32_t u4;
+        uint16_t dir_count;
+        uint32_t u5;
+        uint32_t u6;
+    };
+
     class File {
     public:
         std::string name;
@@ -37,25 +60,19 @@ public:
         uint8_t is_split;
         uint8_t volume_start, volume_end;
 
-        std::tm tm() {
-            // source: https://github.com/lephilousophe/idecomp
-            uint16_t file_date = datetime & 0xffff;
-            uint16_t file_time = (datetime >> 16) & 0xffff;
-            std::tm tm = { /* .tm_sec  = */ (file_time & 0x1f) * 2,
-                           /* .tm_min  = */ (file_time >> 5) & 0x3f,
-                           /* .tm_hour = */ (file_time >> 11) & 0x1f,
-                           /* .tm_mday = */ (file_date) & 0x1f,
-                           /* .tm_mon  = */ ((file_date >> 5) & 0xf) - 1,
-                           /* .tm_year = */ (((file_date >> 9) & 0x7f) + 1980) - 1900,
-                         };
-            tm.tm_isdst = -1;
-            return tm;
-        }
+        std::tm tm() const;
+        std::filesystem::path path() const;
     };
 
     const std::vector<File>& files() const;
     bool exists(const std::string& full_path) const;
     std::vector<uint8_t> decompress(const std::string& full_path);
+    std::filesystem::path path() const {
+        return m_path;
+    }
+    Header header() const {
+        return hdr;
+    }
 
 protected:
     template<class T> T read();
@@ -64,8 +81,9 @@ protected:
     bool isValidName(const std::string& name) const;
     const File* fileByPath(const std::string& full_path) const;
 
-    const std::filesystem::path& path;
+    const std::filesystem::path m_path;
     std::ifstream fin;
     std::vector<File> m_files;
+    Header hdr;
 };
 

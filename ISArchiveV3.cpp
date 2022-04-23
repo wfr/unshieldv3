@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "ISArchiveV3.h"
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <exception>
@@ -25,30 +26,6 @@ extern "C" {
 namespace fs = std::filesystem;
 
 
-class  __attribute__ ((packed)) Header {
-public:
-    uint32_t signature1;
-    uint32_t signature2;
-    uint16_t u1;
-    uint16_t is_multivolume;
-    uint16_t file_count;
-    uint32_t datetime;
-    uint32_t compressed_size;
-    uint32_t uncompressed_size;
-    uint32_t u2;
-    uint8_t volume_total;  // set in first vol only, zero in subsequent vols
-    uint8_t volume_number; // [1...n]
-    uint8_t u3;
-    uint32_t split_begin_address;
-    uint32_t split_end_address;
-    uint32_t toc_address;
-    uint32_t u4;
-    uint16_t dir_count;
-    uint32_t u5;
-    uint32_t u6;
-};
-
-
 class Directory {
 public:
     std::string name;
@@ -57,7 +34,7 @@ public:
 
 
 ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
-    : path(apath)
+    : m_path(apath)
 {
     std::vector<Directory> directories;
 
@@ -69,14 +46,8 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
     }
     uint64_t file_size = fs::file_size(apath);
     assert(file_size > sizeof(Header));
-
-    Header hdr;
     fin.read(reinterpret_cast<char*>(&hdr), sizeof(Header));
     assert(hdr.signature1 == 0x8C655D13 && hdr.signature2 == 0x02013a);
-//    std::cout << "File count: " << hdr.file_count << std::endl;
-//    std::cout << "Archive size: " << hdr.archive_size << std::endl;
-//    std::cout << "Directory count: " << hdr.dir_count << std::endl;
-
     assert(hdr.toc_address < file_size);
     fin.seekg(hdr.toc_address, std::ios::beg);
 
@@ -85,11 +56,7 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
         uint16_t chunk_size = read<uint16_t>();
         std::string name = readString16();
         fin.ignore(chunk_size - uint16_t(name.length()) - 6);
-        if (!isValidName(name)) {
-            throw std::runtime_error(std::string("Invalid directory name: ") + name);
-        }
         directories.push_back({name, file_count});
-//        std::cout << "Directory: " << name << std::endl;
     }
 
     for (Directory& directory : directories) {
@@ -127,6 +94,29 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
         }
     }
 }
+
+std::tm ISArchiveV3::File::tm() const {
+    // source: https://github.com/lephilousophe/idecomp
+    uint16_t file_date = datetime & 0xffff;
+    uint16_t file_time = (datetime >> 16) & 0xffff;
+    std::tm tm = { /* .tm_sec  = */ (file_time & 0x1f) * 2,
+                   /* .tm_min  = */ (file_time >> 5) & 0x3f,
+                   /* .tm_hour = */ (file_time >> 11) & 0x1f,
+                   /* .tm_mday = */ (file_date) & 0x1f,
+                   /* .tm_mon  = */ ((file_date >> 5) & 0xf) - 1,
+                   /* .tm_year = */ (((file_date >> 9) & 0x7f) + 1980) - 1900,
+                 };
+    tm.tm_isdst = -1;
+    return tm;
+}
+
+std::filesystem::path ISArchiveV3::File::path() const {
+    std::string fp = full_path;
+    fp.replace(full_path.begin(), full_path.end(),
+               '\\', fs::path::preferred_separator);
+    return std::filesystem::path(fp);
+}
+
 
 const std::vector<ISArchiveV3::File>& ISArchiveV3::files() const {
     return m_files;

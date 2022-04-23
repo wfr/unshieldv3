@@ -12,8 +12,9 @@ Contained files are compressed with the "PKware implode" algorithm.
 
 ## Usage
 ```
-usage:
+usage: 
   unshieldv3 help                        Produce this message
+  unshieldv3 info ARCHIVE.Z              Show archive metadata
   unshieldv3 list [-v] ARCHIVE.Z         List ARCHIVE contents
   unshieldv3 extract ARCHIVE.Z DESTDIR   Extract ARCHIVE to DESTDIR
 ```

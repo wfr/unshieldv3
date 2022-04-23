@@ -29,12 +29,25 @@ namespace fs = std::filesystem;
 
 
 void info(const ISArchiveV3& archive) {
+    auto hdr = archive.header();
+    cout << "Archive: " << archive.path().string() << endl;
+    cout << "File count: " << hdr.file_count << endl;
+    cout << "Compressed size: " << hdr.compressed_size << endl;
+    cout << "Uncompressed size: " << hdr.uncompressed_size << endl;
+
+    if (hdr.is_multivolume) {
+        cout << "This is a multi-volume archive: " << endl;
+        cout << "  - volume_number: " << int(hdr.volume_number) << endl;
+        cout << "  - volume_total:  " << int(hdr.volume_total) << endl;
+        cout << "  - split_begin_address: " << hdr.split_begin_address << endl;
+        cout << "  - split_end_address:   " << hdr.split_end_address << endl;
+    }
 }
 
 void list(const ISArchiveV3& archive, bool verbose = false) {
     size_t max_path = 0;
     if (verbose) {
-        for (auto f : archive.files()) {
+        for (auto& f : archive.files()) {
             max_path = max(f.full_path.size(), max_path);
         }
         cout << left << setw(max_path) << "Path" << "  "
@@ -69,15 +82,13 @@ bool extract(ISArchiveV3& archive, const fs::path& destination) {
         cerr << "Destination directory not found: " << destination << endl;
         return false;
     }
-    for (auto file : archive.files()) {
+    for (auto& file : archive.files()) {
         cout << file.full_path << endl;
         cout << "      Compressed size: " << setw(10) << file.compressed_size << endl;
         auto contents = archive.decompress(file.full_path);
         cout << "    Uncompressed size: " << setw(10) << contents.size() << endl;
 
-        string fp = file.full_path;
-        replace(fp.begin(), fp.end(), '\\', fs::path::preferred_separator);
-        fs::path dest = destination / fp;
+        fs::path dest = destination / file.path();
         fs::path dest_dir = dest.parent_path();
         if (!fs::create_directories(dest_dir)) {
             if (!fs::exists(dest_dir)) {
@@ -105,9 +116,28 @@ int cmd_help(deque<string> subargs = {}) {
     cerr << "unshieldv3 version " << CMAKE_PROJECT_VER << endl;
     cerr << "usage: " << endl;
     cerr << "  unshieldv3 help                        Produce this message" << endl;
+    cerr << "  unshieldv3 info ARCHIVE.Z              Show archive metadata" << endl;
     cerr << "  unshieldv3 list [-v] ARCHIVE.Z         List ARCHIVE contents" << endl;
     cerr << "  unshieldv3 extract ARCHIVE.Z DESTDIR   Extract ARCHIVE to DESTDIR" << endl;
     return 1;
+}
+
+int cmd_info(deque<string> subargs) {
+    string apath;
+
+    if (subargs.size() != 1) {
+        return cmd_help();
+    }
+
+    apath = subargs[0];
+    if (!fs::exists(apath)) {
+        cerr << "Archive not found: " << apath << endl;
+        return 1;
+    }
+
+    ISArchiveV3 archive(apath);
+    info(archive);
+    return 0;
 }
 
 int cmd_list(deque<string> subargs) {
@@ -132,7 +162,7 @@ int cmd_list(deque<string> subargs) {
     }
     ISArchiveV3 archive(apath);
     list(archive, verbose);
-    return true;
+    return 0;
 }
 
 int cmd_extract(deque<string> subargs) {
@@ -167,6 +197,10 @@ int main(int argc, char** argv) {
 
     if (args[1] == "help") {
         return cmd_help(subargs);
+    }
+
+    if (args[1] == "info") {
+        return cmd_info(subargs);
     }
 
     if (args[1] == "list") {
