@@ -116,6 +116,19 @@ std::filesystem::path ISArchiveV3::File::path() const {
     return std::filesystem::path(fp);
 }
 
+std::string ISArchiveV3::File::attribString() const {
+    bool ro = attrib & File::Attributes::READONLY;
+    bool hidden = attrib & File::Attributes::HIDDEN;
+    bool system = attrib & File::Attributes::SYSTEM;
+    bool archive = attrib & File::Attributes::ARCHIVE;
+    std::ostringstream os;
+    os << (archive ? 'A': '_');
+    os << (hidden ? 'H': '_');
+    os << (ro ? 'R': '_');
+    os << (system ? 'S': '_');
+    return os.str();
+}
+
 
 const std::vector<ISArchiveV3::File>& ISArchiveV3::files() const {
     return m_files;

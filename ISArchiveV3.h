@@ -61,8 +61,16 @@ public:
         uint8_t is_split;
         uint8_t volume_start, volume_end;
 
+        enum Attributes : uint8_t {
+            READONLY = 0x01,
+            HIDDEN   = 0x02,
+            SYSTEM   = 0x04,
+            ARCHIVE  = 0x20
+        };
+
         std::tm tm() const;
         std::filesystem::path path() const;
+        std::string attribString() const;
     };
 
     const std::vector<File>& files() const;
