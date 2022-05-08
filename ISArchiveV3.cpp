@@ -129,7 +129,6 @@ std::string ISArchiveV3::File::attribString() const {
     return os.str();
 }
 
-
 const std::vector<ISArchiveV3::File>& ISArchiveV3::files() const {
     return m_files;
 }
@@ -174,6 +173,10 @@ std::vector<uint8_t> ISArchiveV3::decompress(const std::string& full_path) {
     fin.read(reinterpret_cast<char*>(&buf[0]), file->compressed_size);
     if (fin.fail()) {
         throw std::runtime_error("Read failed");
+    }
+
+    if (file->attrib & File::Attributes::UNCOMPRESSED) {
+        return buf;
     }
 
     int ret;

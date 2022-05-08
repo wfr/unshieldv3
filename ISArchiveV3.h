@@ -62,10 +62,11 @@ public:
         uint8_t volume_start, volume_end;
 
         enum Attributes : uint8_t {
-            READONLY = 0x01,
-            HIDDEN   = 0x02,
-            SYSTEM   = 0x04,
-            ARCHIVE  = 0x20
+            READONLY     = 0x01,
+            HIDDEN       = 0x02,
+            SYSTEM       = 0x04,
+            UNCOMPRESSED = 0x10,
+            ARCHIVE      = 0x20
         };
 
         std::tm tm() const;
