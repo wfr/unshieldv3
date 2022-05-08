@@ -111,7 +111,7 @@ std::tm ISArchiveV3::File::tm() const {
 
 std::filesystem::path ISArchiveV3::File::path() const {
     std::string fp = full_path;
-    fp.replace(full_path.begin(), full_path.end(),
+    std::replace(fp.begin(), fp.end(),
                '\\', fs::path::preferred_separator);
     return std::filesystem::path(fp);
 }
