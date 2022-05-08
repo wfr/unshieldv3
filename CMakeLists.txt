@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.5)
 
-project (unshieldv3 LANGUAGES CXX C VERSION "0.1.1")
+project (unshieldv3 LANGUAGES CXX C VERSION "0.2.0")
 
 if (NOT ${CMAKE_C_BYTE_ORDER} STREQUAL "LITTLE_ENDIAN")
 	message (FATAL_ERROR "Incompatible target. Only LITTLE_ENDIAN byte order is supported.")
