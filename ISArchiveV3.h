@@ -52,6 +52,7 @@ public:
     public:
         std::string name;
         std::string full_path; // Directory separator: \ (Windows)
+        uint16_t index; // position in archive
         uint32_t compressed_size;
         uint32_t uncompressed_size;
         uint32_t datetime;

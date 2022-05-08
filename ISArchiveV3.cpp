@@ -64,8 +64,7 @@ ISArchiveV3::ISArchiveV3(const std::filesystem::path& apath)
             File f;
 
             f.volume_end = read<uint8_t>();
-            uint16_t u1 = read<uint16_t>();
-            (void)u1;
+            f.index = read<uint16_t>();
             f.uncompressed_size = read<uint32_t>();
             f.compressed_size = read<uint32_t>();
             f.offset = read<uint32_t>();
