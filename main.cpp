@@ -27,7 +27,9 @@ limitations under the License.
 using namespace std;
 namespace fs = std::filesystem;
 
-
+/**********************************************************************
+ * Operations
+ **********************************************************************/
 void info(const ISArchiveV3& archive) {
     auto hdr = archive.header();
     cout << "Archive: " << archive.path().string() << endl;
@@ -60,7 +62,7 @@ void list(const ISArchiveV3& archive, bool verbose = false) {
             << endl;
     }
 
-    for (auto f : archive.files()) {
+    for (auto& f : archive.files()) {
         if (verbose) {
             std::tm tm = f.tm();
             cout << left << setw(max_path) << f.full_path << "  "
@@ -112,6 +114,9 @@ bool extract(ISArchiveV3& archive, const fs::path& destination) {
     return true;
 }
 
+/**********************************************************************
+ *  Command-line
+ **********************************************************************/
 int cmd_help(deque<string> subargs = {}) {
     cerr << "unshieldv3 version " << CMAKE_PROJECT_VER << endl;
     cerr << "usage: " << endl;
@@ -184,7 +189,6 @@ int cmd_extract(deque<string> subargs) {
 }
 
 int main(int argc, char** argv) {
-
     vector<string> args;
     for (int i = 0; i < argc; i++) {
         args.push_back(argv[i]);
