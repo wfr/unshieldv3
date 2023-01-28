@@ -17,6 +17,8 @@ limitations under the License.
 #include "ISArchiveV3.h"
 #include <algorithm>
 #include <cassert>
+#include <sstream>
+#include <string>
 #include <iostream>
 #include <exception>
 extern "C" {
@@ -111,8 +113,10 @@ std::tm ISArchiveV3::File::tm() const {
 
 std::filesystem::path ISArchiveV3::File::path() const {
     std::string fp = full_path;
+    // windows paths are wchar_t, convert
+    char pref_seperator = fs::path::preferred_separator;
     std::replace(fp.begin(), fp.end(),
-               '\\', fs::path::preferred_separator);
+            '\\', pref_seperator);
     return std::filesystem::path(fp);
 }
 

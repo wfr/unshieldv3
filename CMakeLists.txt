@@ -21,5 +21,9 @@ add_executable (unshieldv3
 	ISArchiveV3.cpp
 	blast.c
 )
-target_link_libraries(unshieldv3 stdc++fs)
+
+target_link_libraries(unshieldv3)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	target_link_libraries(stdc++fs)
+endif()
 install(TARGETS unshieldv3)
