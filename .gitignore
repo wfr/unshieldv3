@@ -108,3 +108,12 @@ Thumbs.db
 # Build directory
 # ---------------
 build/*
+
+# generated config
+config.h
+
+# clangd cache
+.cache/
+
+# VScode IDE files
+.vscode/
