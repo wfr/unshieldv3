@@ -23,7 +23,4 @@ add_executable (unshieldv3
 )
 
 target_link_libraries(unshieldv3)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	target_link_libraries(stdc++fs)
-endif()
 install(TARGETS unshieldv3)
