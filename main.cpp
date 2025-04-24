@@ -46,7 +46,7 @@ void info(const ISArchiveV3& archive) {
     }
 }
 
-void list(const ISArchiveV3& archive, bool verbose = false) {
+void list_archive(const ISArchiveV3& archive, bool verbose = false) {
     size_t max_path = 0;
     if (verbose) {
         for (auto& f : archive.files()) {
@@ -166,7 +166,7 @@ int cmd_list(deque<string> subargs) {
         return 1;
     }
     ISArchiveV3 archive(apath);
-    list(archive, verbose);
+    list_archive(archive, verbose);
     return 0;
 }
 
