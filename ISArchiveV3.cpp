@@ -18,6 +18,7 @@ limitations under the License.
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <sstream>
 #include <exception>
 extern "C" {
     #include "blast.h"
