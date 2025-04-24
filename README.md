@@ -1,4 +1,4 @@
-# UnshieldV3
+# unshieldv3
 Extract InstallShield V3 (Z) archives.
 
 ## About InstallShield v3 (Z) archives

@@ -20,6 +20,7 @@ limitations under the License.
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <exception>
 extern "C" {
     #include "blast.h"
@@ -121,15 +122,11 @@ std::filesystem::path ISArchiveV3::File::path() const {
 }
 
 std::string ISArchiveV3::File::attribString() const {
-    bool ro = attrib & File::Attributes::READONLY;
-    bool hidden = attrib & File::Attributes::HIDDEN;
-    bool system = attrib & File::Attributes::SYSTEM;
-    bool archive = attrib & File::Attributes::ARCHIVE;
     std::ostringstream os;
-    os << (archive ? 'A': '_');
-    os << (hidden ? 'H': '_');
-    os << (ro ? 'R': '_');
-    os << (system ? 'S': '_');
+    os << (attrib & File::Attributes::ARCHIVE  ? 'A' : '_');
+    os << (attrib & File::Attributes::HIDDEN   ? 'H' : '_');
+    os << (attrib & File::Attributes::READONLY ? 'R' : '_');
+    os << (attrib & File::Attributes::SYSTEM   ? 'S' : '_');
     return os.str();
 }
 
