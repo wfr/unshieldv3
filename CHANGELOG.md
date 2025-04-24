@@ -2,14 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
-### Added
+## [0.2.2] 2025-04-24
 
 ### Fixed
-- compilation with modern clang (thanks to https://github.com/jchv)
+- compilation with modern clang
+  (thanks to https://github.com/yincrash and https://github.com/jchv)
   - stop linking against `libstdc++fs`
-  - include `<sstream>`
+  - include `<sstream>
+- Windows path handling
+  (thanks to https://github.com/yincrash)
 
 ## [0.2.1] 2022-05-08
 
