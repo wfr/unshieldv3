@@ -21,5 +21,4 @@ add_executable (unshieldv3
 	ISArchiveV3.cpp
 	blast.c
 )
-target_link_libraries(unshieldv3 stdc++fs)
 install(TARGETS unshieldv3)
